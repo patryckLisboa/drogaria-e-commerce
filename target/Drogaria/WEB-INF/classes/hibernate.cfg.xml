@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+	<session-factory>
+	
+		<!-- Configurações de conexão com o banco de dados -->
+		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+		<property name="hibernate.connection.url">jdbc:mysql://127.0.0.1:3306/drogaria</property>
+		<property name="hibernate.connection.username">root</property>
+		<property name="hibernate.connection.password">xyc2dy9t</property>
+		
+		<!-- Quantas seções ele abre ao mesmo tempo (Pool de conexões) -->
+		<property name="hibernate.connection.pool_size">1</property>
+		
+		<!-- SQL dialeto -->
+		<property name="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</property>
+		
+		<!-- Gerenciamento do contexto da seção (gerenciado por threads) -->
+		<property name="hibernate.current_session_context_class">thread</property>
+		
+		<!-- Cache de segundo nível -->
+		<property name="cache.provider_class">org.hibernate.cache.internal.noCacheProvider</property>
+		
+		<!-- mostra as SQLs geradas -->
+		<property name="show_sql">true</property>
+		
+		<!-- Cria as tabelas do banco de dados -->
+		<property name="hbm2ddl.auto">create</property>
+		                  
+	</session-factory>
+</hibernate-configuration>	

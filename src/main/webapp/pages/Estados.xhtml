@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core" 
+	xmlns:p="http://primefaces.org/ui">  <!-- as letras h,f,p é só para nomenclatura -->
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Estados</title>
+</h:head>
+<h:body>
+
+	<p:growl id="mensagem"/> <!-- para pegar no projeto inteiro, tem que colocar fora -->
+	
+	<h:form id="formListagem">
+		<p:panel header="Estados - Listagem">
+			<p:dataTable id="tabela" emptyMessage="Nenhum registro encontrado." 
+						paginator="true"
+						value="#{estadoBean.estados}" 
+						var="estado" 
+						rows="10"> <!-- var: vai declarar um cursor que desenha cada estado (ja pega a linha correnta)
+											Pode ser qualquer nome -->
+			
+				<f:facet name="header">
+					<p:commandButton value="Novo" 
+										oncomplete="PF('dialogo').show();"
+										actionListener="#{estadoBean.novo}"
+										update=":formCadastro:painel" />
+										 <!-- header é em cima e se eu quiser em baixo eu troco para footer -->
+										<!-- oncomplete (quando completar) chama o evento "mostrar" -->
+										<!-- o update atualisou o painel no form cadastro -->
+				</f:facet> <!-- trocar a propriedade footer da tabela -->
+			
+				<p:column headerText="Nome" sortBy="#{estado.nome}" 
+				filterBy="#{estado.nome}"> <h:outputText value="#{estado.nome}" /> </p:column>
+				
+				<p:column headerText="Sigla" sortBy="#{estado.sigla}" 
+				filterBy="#{estado.sigla}" > <h:outputText value="#{estado.sigla}" /> </p:column>
+				
+				<p:column headerText="Opções"> 
+					<p:commandButton icon="ui-icon-trash" actionListener="#{estadoBean.excluir}"
+					update=":mensagem :formListagem:tabela"> <!--  tabela de icones no site do prime -->
+						<p:confirm haeder="Confirmação" message="Deseja excluir o objeto?" icon="ui-icon-alert"/>
+						
+						<f:attribute name="estadoSelecionado" value="#{estado}"/> <!-- guarda a linha clicada no atributo estadoSelecion.... linah atual -->
+					</p:commandButton>
+					
+					<p:commandButton icon="ui-icon-pencil" actionListener="#{estadoBean.editar}"
+					update=":formCadastro:painel" oncomplete="PF('dialogo').show();">
+					
+						<f:attribute name="estadoSelecionado" value="#{estado}"/>
+					</p:commandButton>
+				</p:column> 
+			</p:dataTable>
+			
+			<p:confirmDialog global="true"> <!-- qualquer confirmação da janela (que usa o "confirm") chama essa caixa -->
+				<p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"/> <!-- type button para dizer que é só de confirmação -->
+				<p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close"/>
+				
+			</p:confirmDialog>
+		</p:panel>
+	</h:form>
+	
+	<p:dialog header="Estados - Cadastro" widgetVar="dialogo" 
+				draggable="false" resizable="false" modal="true" closable="false">
+									<!-- dialog serve para subir uma tela como pop up/ tem varias propriedades-->
+												<!-- widgetvar é como uma variavel para referenciar os componentes -->
+												<!-- draggable permissao para arrastar -->
+												<!-- resizeble permissao para redimencionar -->
+												<!-- modal para desabilitar o que esta por baixo -->
+												<!-- closeble ´permissao para mostrar o "x" de fechar -->
+		
+		<h:form id="formCadastro">
+			<h:panelGrid id="painel" columns="1"> <!-- cortar de 2 em dois elementos  -->
+			
+				<p:row>
+				<p:outputLabel for="nome" value="Nome:"/>
+				<p:inputText id="nome" maxlength="50" size="30" value="#{estadoBean.estado.nome}" required="true" requiredMessage="o campo nome é obrigatório"/> <!-- size é o tamanho visualizavel  / maxlength para bloquear determinado numero de caracteres-->
+				</p:row>
+				
+				<p:row>
+				<p:outputLabel for="sigla" value="Sigla:"/>
+				<p:inputText id="sigla" maxlength="2" size="10" value="#{estadoBean.estado.sigla}" required="true" requiredMessage="O campo sigla é obrigatório"/> <!-- para amarrar com o atributo que está no estadoBean -->
+				</p:row>
+			</h:panelGrid>	
+			
+			<h:panelGrid columns="2">
+			
+				<p:commandButton value="Salvar" actionListener="#{estadoBean.salvar}" update=":mensagem :formCadastro:painel :formListagem:tabela"/>
+				<p:commandButton value="Fechar" oncomplete="PF('dialogo').hide();"/> <!-- hide para fechar -->
+			</h:panelGrid>
+		</h:form>					
+	</p:dialog> 
+
+
+</h:body>
+</html>

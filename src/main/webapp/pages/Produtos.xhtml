@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core" 
+	xmlns:p="http://primefaces.org/ui">  <!-- as letras h,f,p é só para nomenclatura -->
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Produtos</title>
+</h:head>
+<h:body>
+	<p:growl id="mensagem"/>
+	<h:form id="formListagem">
+		<p:panel header="Produtos - Listagem">
+			<p:dataTable id="tabela" emptyMessage="Nenhum registro encontrado." paginator="true"
+			value="#{produtoBean.produtos}" var="produto" rows="10">
+			
+				<f:facet name="header">
+					<p:commandButton value="Novo" actionListener="#{produtoBean.novo()}" update=":mensagem :formCadastro:painel"
+ 					 oncomplete="PF('dialogo').show();"> <!-- header é em cima e se eu quiser em baixo eu troco para footer -->
+																<!-- oncomplete (quando completar) chama o evento "mostrar" -->
+						<f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+											<!-- oncomplete (quando completar) chama o evento "mostrar" -->
+					</p:commandButton>
+				</f:facet> <!-- trocar para se colocar na propriedade footer da tabela -->
+			
+				<p:column headerText="Descrição" filterBy="#{produto.descricao}" sortBy="#{produto.descricao}"> <h:outputText value="#{produto.descricao}" /> </p:column>
+				<p:column headerText="Quantidade" filterBy="#{produto.quantidade}" sortBy="#{produto.quantidade}"> <h:outputText value="#{produto.quantidade}" /> </p:column>
+				
+				<p:column headerText="Preço" filterBy="#{produto.preco}" sortBy="#{produto.preco}"> 
+					<h:outputText value="#{produto.preco}" >
+						<f:convertNumber locale="pt_BR" minFractionDigits="2"/>
+						<!-- minFractionDigits numeros depois da virgola -->
+					</h:outputText> 
+				</p:column>
+				
+				<p:column headerText="Fabricante" filterBy="#{produto.fabricante.descricao}" sortBy="#{produto.fabricante.descricao}"> <h:outputText value="#{produto.fabricante.descricao}"/></p:column>
+				
+				<p:column headerText="Opções">
+					<p:commandButton icon="ui-icon-trash" actionListener="#{produtoBean.excluir}"
+					update=":mensagem :formListagem:tabela"> <!--  tabela de icones no site do prime -->
+						<p:confirm haeder="Confirmação" message="Deseja excluir o objeto?" icon="ui-icon-alert"/>
+						
+						<f:attribute name="produtoSelecionado" value="#{produto}"/> <!-- guarda a linha clicada no atributo estadoSelecion.... linah atual -->
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-pencil" actionListener="#{produtoBean.editar}"
+					update=":mensagem :formCadastro:painel" oncomplete="PF('dialogo').show();">  <!-- coloca :mensagem para chave estrangeira -->
+					
+						<f:attribute name="produtoSelecionado" value="#{produto}"/>
+						<f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" /> <!--  para reiniciar o vermelho da digitação inválida -->
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+			<p:confirmDialog global="true"> <!-- qualquer confirmação da janela (que usa o "confirm") chama essa caixa -->
+				<p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"/> <!-- type button para dizer que é só de confirmação -->
+				<p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close"/>
+				
+			</p:confirmDialog>
+		</p:panel>
+	</h:form>
+	
+	<p:dialog header="Produtos - Cadastro" widgetVar="dialogo" 
+				draggable="true" resizable="false" modal="true" closable="false">
+									<!-- dialog serve para subir uma tela como pop up/ tem varias propriedades-->
+												<!-- widgetvar é como uma variavel para referenciar os componentes -->
+												<!-- draggable permissao para arrastar -->
+												<!-- resizeble permissao para redimencionar -->
+												<!-- modal para desabilitar o que esta por baixo -->
+												<!-- closeble ´permissao para mostrar o "x" de fechar -->
+		
+		<h:form id="formCadastro" enctype="multipart/form-data">
+		
+			<h:panelGrid id="painel" columns="1"> 
+				
+				<p:row>
+				<p:outputLabel for="descricao" value="Descrição:"/>
+				<p:inputText id="descricao" maxlength="50" size="30" value="#{produtoBean.produto.descricao}" required="true" requiredMessage="O campo descrição é obrigatório"/>
+				</p:row>
+				
+				<p:row>
+				<p:outputLabel for="quantidade" value="Quantidade:"/>
+				<p:inputText id="quantidade" maxlength="5" size="10" 
+					value="#{produtoBean.produto.quantidade}" 
+					required="true" 
+					requiredMessage="O campo quantidade é obrigatório"
+					converterMessage="informe um valor numérico no campo quantidade" 
+					validatorMessage="Informe um valor entre 0 e 1000 para o campo quantidade">
+					 <!-- 5 é o maximo apra o tipo short -->
+					 <f:validateLongRange minimum="0" maximum="1000" />
+					
+					 <!-- varios validates. até para validar cpf -->
+					 <!-- na primeira faze roda os campos obritatorios
+					 		segunda faze verifica os conversores (se estiver char no lugar de int, exemplo)
+					 		terceira faze roda o validador que valida o intervalo por exemplo -->
+				</p:inputText>
+				</p:row>
+				
+				<p:row>
+				<p:outputLabel for="preco" value="Preço:"/>
+				<p:inputText id="preco" maxlength="7" size="30" 
+					value="#{produtoBean.produto.preco}" 
+					required="true" 
+					requiredMessage="O campo preço é obrigatório"
+					converterMessage="informe um valor numérico no campo preco" 
+					validatorMessage="Informe um número entre 0,01 e 9999,99 para o campo preço">
+					 <!-- conta antes da virgula, depois e a propria virgula também -->
+					 
+					 <f:convertNumber locale="pt_BR" minFractionDigits="2"/>
+					 <f:validateDoubleRange minimum="0.01" maximum="9999.99"/>
+					  <!-- valores reais curtos (float), reais longos (double) e big decimal -->
+					  
+				</p:inputText>
+				</p:row>
+				
+				<!-- o riqueired checa se é nulo e apenas tipos como Long, BigInt e etc são nulos quando há a auxencia de valor e o "int" por exemplo é apenas zero (0) -->
+				<p:row>
+				<p:outputLabel for="fabricante" value="Fabricante:"/>	
+				<p:selectOneMenu id="fabricante" filter="true" value="#{produtoBean.produto.fabricante}" 
+								converter="omnifaces.SelectItemsConverter" required="true" requiredMessage="O campo fabricante é obrigatório"> <!-- filter para fazer pesquisa -->
+							<!-- precisa escrever o converter -->> <!-- filter para fazer pesquisa -->
+					
+					<f:selectItem noSelectionOption="true" itemLabel="Selecione um fabricante" /> <!--  editar cada item da lista
+																	itemValue grava no banco
+																	itemLabel aparece para o usuario -->
+																	<!--  editar cada item da lista
+																 	-->
+					<f:selectItems value="#{produtoBean.fabricantes}" var="fabricante"
+						itemValue="#{fabricante}" itemLabel="#{fabricante.descricao} - #{fabricante.codigo}"/>		
+																	
+				</p:selectOneMenu> <!-- caixa de seleção -->
+				</p:row>
+				
+				<p:row>
+				<p:outputLabel for="foto" value="Foto:"/>
+				<p:fileUpload id="foto" mode="advanced" 
+					fileUploadListener="#{produtoBean.upload}" 
+					update=":mensagem :formCadastro:foto" auto="true"/> <!-- auto="true" serve para dar upload automaticamente -->
+				</p:row>
+				
+				<p:row>
+				<p:outputLabel for="foto" value="Foto:" />
+				<p:graphicImage id="foto" value="#{imagemBean.foto}">
+					<f:param name="caminho" value="#{produtoBean.produto.caminho}" /> <!-- caminho recebe value 	(tipo variavel) -->
+				</p:graphicImage>
+				</p:row>
+				
+ 			</h:panelGrid>	
+			
+			<h:panelGrid columns="2">
+				<p:commandButton value="Salvar" actionListener="#{produtoBean.salvar}" update=":mensagem :formCadastro:painel :formListagem:tabela"/>
+				<p:commandButton value="Fechar" oncomplete="PF('dialogo').hide();"/> <!-- hide para fechar -->
+			
+
+			</h:panelGrid>
+		</h:form>					
+	</p:dialog> 
+
+
+</h:body>
+</html>
